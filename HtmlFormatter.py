@@ -43,21 +43,40 @@ class HtmlFormatter:
 	partyMemberNames = {}
 	icons = {}
 	currency = "Yen"
+	defaultFontSize = 14
+	fontUnit = "pt"
+
+	def serializeCss(self, params) -> str:
+		css = ""
+
+		for key in params:
+			css += key
+			css += ": "
+			css += str(params[key])
+			if key == "font-size":
+				css += self.fontUnit
+			css += "; "
+
+		return css.strip()
 
 	def doTheThing(self, tokens) -> str:
 		output = ""
 		isSpanOpen = False
+		currentStyle = {}
 
 		for t in tokens:
 			if isinstance(t, RpgLexer.RPGText):
+				if len(currentStyle) + 0:
+					isSpanOpen = True
+					output += f'<span style="{self.serializeCss(currentStyle)}">'
 				output += html.escape(t.toFormattedText()).replace("\n", "<br>")
 			elif isinstance(t, RpgLexer.RPGToken):
 				if isSpanOpen:
 					output += "</span>"
+					isSpanOpen = False
 
 				if t.tag == "C":
-					output += f'<span color="{self.colors[int(t.argument)]}">'
-					isSpanOpen = True
+					currentStyle["color"] = self.colors[int(t.argument)]
 				elif t.tag == "V":
 					output += self.variables[int(t.argument)]
 				elif t.tag == "N":
@@ -68,6 +87,14 @@ class HtmlFormatter:
 					output += f'<img alt="{t.argument}" src="{self.icons[int(t.argument)]}">'
 				elif t.tag == "G":
 					output += self.currency
+				elif t.tag == "{":
+					if not "font-size" in currentStyle:
+						currentStyle["font-size"] = self.defaultFontSize
+					currentStyle["font-size"] += 1
+				elif t.tag == "}":
+					if not "font-size" in currentStyle:
+						currentStyle["font-size"] = self.defaultFontSize
+					currentStyle["font-size"] -= 1
 
 		if isSpanOpen:
 			output += "</span>"
