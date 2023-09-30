@@ -15,12 +15,13 @@ class LexerTest(unittest.TestCase):
 
 class FormatterTest(unittest.TestCase):
 	def test_formatter(self):
-		string = "\\.\"Trouver le \\C[2]\\{corps\\}\\C[0]...!\n C'est vrai, il y avait la note.\""
+		string = "\\.\"Trouver le \\C[2]\\{\\V[3]\\}\\C[0]...!\n C'est vrai, il y avait la note.\""
 		tokens = RpgLexer.lex(string)
 
 		formatter = HtmlFormatter.HtmlFormatter()
+		formatter.variableSupplier = lambda v : f"Variable {v}"
 		formatter.colors = HtmlFormatter.yttdColors
-		print(formatter.doTheThing(tokens))
+		self.assertEqual(formatter.doTheThing(tokens), '&quot;Trouver le Variable 3<span style="color: #ffffff; font-size: 14pt;">...!<br> C&#x27;est vrai, il y avait la note.&quot;</span>')
 
 if __name__ == '__main__':
 	unittest.main()

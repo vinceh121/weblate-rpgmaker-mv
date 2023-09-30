@@ -46,6 +46,12 @@ class HtmlFormatter:
 	defaultFontSize = 14
 	fontUnit = "pt"
 
+	colorSupplier = lambda self, v : self.colors[v]
+	variableSupplier = lambda self, v : self.variables[v]
+	actorNameSupplier = lambda self, v : self.actorNames[v]
+	partyMemberSupplier = lambda self, v : self.partyMemberNames[v]
+	iconSupplier = lambda self, v : self.icons[v]
+
 	def serializeCss(self, params) -> str:
 		css = ""
 
@@ -76,15 +82,15 @@ class HtmlFormatter:
 					isSpanOpen = False
 
 				if t.tag == "C":
-					currentStyle["color"] = self.colors[int(t.argument)]
+					currentStyle["color"] = self.colorSupplier(int(t.argument))
 				elif t.tag == "V":
-					output += self.variables[int(t.argument)]
+					output += self.variableSupplier(int(t.argument))
 				elif t.tag == "N":
-					output += self.actorNames[int(t.argument)]
+					output += self.actorNameSupplier(int(t.argument))
 				elif t.tag == "O":
-					output += self.partyMemberNames[int(t.argument)]
+					output += self.partyMemberSupplier(int(t.argument))
 				elif t.tag == "I":
-					output += f'<img alt="{t.argument}" src="{self.icons[int(t.argument)]}">'
+					output += f'<img alt="{t.argument}" src="{self.iconSupplier(int(t.argument))}">'
 				elif t.tag == "G":
 					output += self.currency
 				elif t.tag == "{":
