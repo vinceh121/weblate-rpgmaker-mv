@@ -1,5 +1,5 @@
 import html
-import RpgLexer
+from rpgmv import RpgLexer
 
 yttdColors = {
 	0: "#ffffff",
@@ -72,7 +72,7 @@ class HtmlFormatter:
 
 		for t in tokens:
 			if isinstance(t, RpgLexer.RPGText):
-				if len(currentStyle) + 0:
+				if len(currentStyle) != 0:
 					isSpanOpen = True
 					output += f'<span style="{self.serializeCss(currentStyle)}">'
 				output += html.escape(t.toFormattedText()).replace("\n", "<br>")
