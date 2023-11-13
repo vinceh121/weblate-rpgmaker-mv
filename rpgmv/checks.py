@@ -17,5 +17,31 @@ class RpgTagsCheck(TargetCheckParametrized):
 		formatter.iconSupplier = lambda v : '/favicon.ico'
 		formatter.colors = HtmlFormatter.yttdColors
 
-		tokens = RpgLexer.lex(check_obj.unit.target)
-		return format_html(formatter.doTheThing(tokens))
+		sourceHtml = None
+		sourceError = None
+		try:
+			sourceHtml = formatter.doTheThing(RpgLexer.lex(check_obj.unit.source))
+		except ValueError as e:
+			sourceError = e
+
+		formatter.clear()
+
+		targetHtml = None
+		targetError = None
+		try:
+			targetHtml = formatter.doTheThing(RpgLexer.lex(check_obj.unit.target))
+		except ValueError as e:
+			targetError = e
+
+		return format_html(f"""<table class=\"table table-bordered table-striped\">
+			<tbody>
+			<tr {"class='danger'" if sourceError else ""}>
+				<td>Source</td>
+				<td>{sourceHtml or sourceError}</td>
+			</tr>
+			<tr {"class='danger'" if targetError else ""}>
+				<td>Target</td>
+				<td>{targetHtml or targetError}</td>
+			</tr>
+		</table>""")
+

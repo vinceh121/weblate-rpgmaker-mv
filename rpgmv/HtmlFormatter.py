@@ -1,5 +1,5 @@
 import html
-import RpgLexer
+from rpgmv import RpgLexer
 
 yttdColors = {
 	0: "#ffffff",
@@ -55,6 +55,11 @@ class HtmlFormatter:
 	output = ""
 	isSpanOpen = False
 	currentStyle = {}
+
+	def clear(self):
+		self.output = ""
+		self.isSpanOpen = False
+		self.currentStyle = {}
 
 	def serializeCss(self, params) -> str:
 		css = ""
