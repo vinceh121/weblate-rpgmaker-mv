@@ -52,7 +52,7 @@ def lex(rawText) -> list[RPGToken]:
 
 				tag.tag = c
 
-				if rawText[i + 1] == "[":
+				if i + 1 < len(rawText) and rawText[i + 1] == "[":
 					tag.argument = ""
 
 					i += 2
