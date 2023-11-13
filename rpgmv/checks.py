@@ -17,6 +17,8 @@ class RpgTagsCheck(TargetCheckParametrized):
 		formatter.iconSupplier = lambda v : '/favicon.ico'
 		formatter.colors = HtmlFormatter.yttdColors
 
+		formatter.reset()
+
 		sourceHtml = None
 		sourceError = None
 		try:
@@ -24,7 +26,7 @@ class RpgTagsCheck(TargetCheckParametrized):
 		except ValueError as e:
 			sourceError = e
 
-		formatter.clear()
+		formatter.reset()
 
 		targetHtml = None
 		targetError = None

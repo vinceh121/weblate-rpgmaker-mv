@@ -56,10 +56,10 @@ class HtmlFormatter:
 	isSpanOpen = False
 	currentStyle = {}
 
-	def clear(self):
+	def reset(self):
 		self.output = ""
 		self.isSpanOpen = False
-		self.currentStyle = {}
+		self.currentStyle = { "font-size": self.defaultFontSize, "color": self.colorSupplier(0) }
 
 	def serializeCss(self, params) -> str:
 		css = ""
