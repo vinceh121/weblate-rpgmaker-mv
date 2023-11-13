@@ -21,7 +21,7 @@ class FormatterTest(unittest.TestCase):
 		formatter = HtmlFormatter.HtmlFormatter()
 		formatter.variableSupplier = lambda v : f"Variable {v}"
 		formatter.colors = HtmlFormatter.yttdColors
-		self.assertEqual(formatter.doTheThing(tokens), '&quot;Trouver le Variable 3<span style="color: #ffffff; font-size: 14pt;">...!<br> C&#x27;est vrai, il y avait la note.&quot;</span>')
+		self.assertEqual(formatter.doTheThing(tokens), '&quot;Trouver le <span style="color: #ff784c; font-size: 15pt;">Variable 3</span><span style="color: #ffffff; font-size: 14pt;">...!<br> C&#x27;est vrai, il y avait la note.&quot;</span>')
 
 if __name__ == '__main__':
 	unittest.main()

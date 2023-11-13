@@ -1,5 +1,5 @@
 import html
-from rpgmv import RpgLexer
+import RpgLexer
 
 yttdColors = {
 	0: "#ffffff",
@@ -43,7 +43,7 @@ class HtmlFormatter:
 	partyMemberNames = {}
 	icons = {}
 	currency = "Yen"
-	defaultFontSize = 14
+	defaultFontSize = 12
 	fontUnit = "pt"
 
 	colorSupplier = lambda self, v : self.colors[v]
@@ -51,6 +51,10 @@ class HtmlFormatter:
 	actorNameSupplier = lambda self, v : self.actorNames[v]
 	partyMemberSupplier = lambda self, v : self.partyMemberNames[v]
 	iconSupplier = lambda self, v : self.icons[v]
+
+	output = ""
+	isSpanOpen = False
+	currentStyle = {}
 
 	def serializeCss(self, params) -> str:
 		css = ""
@@ -65,43 +69,47 @@ class HtmlFormatter:
 
 		return css.strip()
 
-	def doTheThing(self, tokens) -> str:
-		output = ""
-		isSpanOpen = False
-		currentStyle = {}
+	def applyStyle(self): # needs to be called at each text write
+		if len(self.currentStyle) != 0:
+			self.isSpanOpen = True
+			self.output += f'<span style="{self.serializeCss(self.currentStyle)}">'
 
+	def doTheThing(self, tokens) -> str:
 		for t in tokens:
 			if isinstance(t, RpgLexer.RPGText):
-				if len(currentStyle) != 0:
-					isSpanOpen = True
-					output += f'<span style="{self.serializeCss(currentStyle)}">'
-				output += html.escape(t.toFormattedText()).replace("\n", "<br>")
+				self.applyStyle()
+				self.output += html.escape(t.toFormattedText()).replace("\n", "<br>")
 			elif isinstance(t, RpgLexer.RPGToken):
-				if isSpanOpen:
-					output += "</span>"
-					isSpanOpen = False
+				if self.isSpanOpen:
+					self.output += "</span>"
+					self.isSpanOpen = False
 
 				if t.tag == "C":
-					currentStyle["color"] = self.colorSupplier(int(t.argument))
+					self.currentStyle["color"] = self.colorSupplier(int(t.argument))
 				elif t.tag == "V":
-					output += self.variableSupplier(int(t.argument))
+					self.applyStyle()
+					self.output += self.variableSupplier(int(t.argument))
 				elif t.tag == "N":
-					output += self.actorNameSupplier(int(t.argument))
+					self.applyStyle()
+					self.output += self.actorNameSupplier(int(t.argument))
 				elif t.tag == "O":
-					output += self.partyMemberSupplier(int(t.argument))
+					self.applyStyle()
+					self.output += self.partyMemberSupplier(int(t.argument))
 				elif t.tag == "I":
-					output += f'<img alt="{t.argument}" src="{self.iconSupplier(int(t.argument))}">'
+					self.applyStyle()
+					self.output += f'<img alt="{t.argument}" src="{self.iconSupplier(int(t.argument))}">'
 				elif t.tag == "G":
-					output += self.currency
+					self.applyStyle()
+					self.output += self.currency
 				elif t.tag == "{":
-					if not "font-size" in currentStyle:
-						currentStyle["font-size"] = self.defaultFontSize
-					currentStyle["font-size"] += 1
+					if not "font-size" in self.currentStyle:
+						self.currentStyle["font-size"] = self.defaultFontSize
+					self.currentStyle["font-size"] += 1
 				elif t.tag == "}":
-					if not "font-size" in currentStyle:
-						currentStyle["font-size"] = self.defaultFontSize
-					currentStyle["font-size"] -= 1
+					if not "font-size" in self.currentStyle:
+						self.currentStyle["font-size"] = self.defaultFontSize
+					self.currentStyle["font-size"] -= 1
 
-		if isSpanOpen:
-			output += "</span>"
-		return output
+		if self.isSpanOpen:
+			self.output += "</span>"
+		return self.output
