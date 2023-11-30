@@ -1,13 +1,33 @@
-from weblate.checks.base import TargetCheckParametrized
+from weblate.checks.base import TargetCheck
 from django.utils.html import format_html
 from rpgmv import RpgLexer
 from rpgmv import HtmlFormatter
 
-class RpgTagsCheck(TargetCheckParametrized):
+def frequency_table(tokens, table):
+	for t in tokens:
+		if isinstance(t, RpgLexer.RPGTag):
+			if t.tag in table:
+				table[t.tag] += 1
+			else:
+				table[t.tag] = 1
+
+class RpgTagsCheck(TargetCheck):
 	check_id = "rpg-tags"
-	name = "Checks consistency of RPGMaker MV tags, and renders the string"
+	name = "Consistency of RPGMaker MV tags"
 	default_disabled = True
 	always_display = True
+
+	def check_single(self, source, target, unit):
+		sourceTokens = RpgLexer.lex(source)
+		targetTokens = RpgLexer.lex(target)
+
+		sourceFreq = {}
+		targetFreq = {}
+
+		frequency_table(sourceTokens, sourceFreq)
+		frequency_table(targetTokens, targetFreq)
+
+		return sourceFreq != targetFreq
 
 	def get_description(self, check_obj):
 		formatter = HtmlFormatter.HtmlFormatter()
