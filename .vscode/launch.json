@@ -12,6 +12,12 @@
 			"args": ["runserver"],
 			"console": "integratedTerminal",
 			"justMyCode": false
+		},
+		{
+			"name": "Tests",
+			"type": "python",
+			"request": "launch",
+			"program": "./rpgmv/tests.py"
 		}
 	]
 }
