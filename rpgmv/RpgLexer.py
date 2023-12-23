@@ -59,6 +59,14 @@ def lex(rawText) -> list[RPGToken]:
 					while i < len(rawText) and rawText[i] != "]":
 						tag.argument += rawText[i]
 						i += 1
+				elif i + 1 < len(rawText) and rawText[i + 2] == "[": # support tags with a length of 2
+					tag.argument = ""
+					tag.tag += rawText[i + 1]
+					
+					i += 3
+					while i < len(rawText) and rawText[i] != "]":
+						tag.argument += rawText[i]
+						i += 1
 		else:
 			text += c
 		i += 1

@@ -13,6 +13,16 @@ class LexerTest(unittest.TestCase):
 		self.assertEqual(list(map(lambda t : t.toUnformattedText(), tokens)), unformatted)
 		self.assertEqual(list(map(lambda t : t.toFormattedText(), tokens)), formatted)
 
+	def test_formats_two(self):
+		string = "\\.\\sp[8]\\C[3]Mais qui est cette personne...?"
+		tokens = RpgLexer.lex(string)
+
+		unformatted = ['', '\\sp[8]', '\\C[3]', 'Mais qui est cette personne...?']
+		formatted = ['', '', '', 'Mais qui est cette personne...?']
+
+		self.assertEqual(list(map(lambda t : t.toUnformattedText(), tokens)), unformatted)
+		self.assertEqual(list(map(lambda t : t.toFormattedText(), tokens)), formatted)
+
 class FormatterTest(unittest.TestCase):
 	def test_formatter(self):
 		string = "\\.\"Trouver le \\C[2]\\{\\V[3]\\}\\C[0]...!\n C'est vrai, il y avait la note.\""
