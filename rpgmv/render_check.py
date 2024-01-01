@@ -1,6 +1,9 @@
 # Copyright © Michal Čihař <michal@weblate.org>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Modified version of the weblate/checks/render.py 
+# file in order to support RPGMaker MV tags and non-wrapping text
 
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,7 +14,7 @@ from django.utils.translation import gettext_lazy
 
 from weblate.checks.base import TargetCheckParametrized
 from weblate.checks.parser import multi_value_flag
-from weblate.fonts.utils import check_render_size
+from rpgmv.render_utils import check_render_size
 
 FONT_PARAMS = (
     ("font-family", "sans"),
@@ -26,9 +29,9 @@ IMAGE = '<a href="{0}" class="thumbnail"><img class="img-responsive" src="{0}" /
 class MaxSizeCheck(TargetCheckParametrized):
     """Check for maximum size of rendered text."""
 
-    check_id = "max-size"
-    name = gettext_lazy("Maximum size of translation")
-    description = gettext_lazy("Translation rendered text should not exceed given size")
+    check_id = "max-size-rpg"
+    name = gettext_lazy("Maximum size of RPGMV translation")
+    description = gettext_lazy("Translation rendered text should not exceed given size, supports RPGMaker MV tags")
     default_disabled = True
     last_font = None
     always_display = True

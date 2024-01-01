@@ -1,6 +1,8 @@
 # Copyright © Michal Čihař <michal@weblate.org>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Modifier version of the fonts/utils.py file in order to fail when text wraps
 
 """Font handling wrapper."""
 
@@ -155,6 +157,7 @@ def render_size(font, weight, size, spacing, text, width=1000, lines=1, cache_ke
     # Calculate dimensions
     line_count = layout.get_line_count()
     pixel_size = layout.get_pixel_size()
+    has_wrapped = layout.is_wrapped()
 
     # Show text
     PangoCairo.show_layout(context, layout)
@@ -190,15 +193,15 @@ def render_size(font, weight, size, spacing, text, width=1000, lines=1, cache_ke
             surface.write_to_png(buff)
             cache.set(cache_key, buff.getvalue())
 
-    return pixel_size, line_count
+    return pixel_size, line_count, has_wrapped
 
 
 def check_render_size(font, weight, size, spacing, text, width, lines, cache_key=None):
     """Checks whether rendered text fits."""
-    size, actual_lines = render_size(
+    size, actual_lines, has_wrapped = render_size(
         font, weight, size, spacing, text, width, lines, cache_key
     )
-    return size.width <= width and actual_lines <= lines
+    return size.width <= width and actual_lines <= lines and not has_wrapped
 
 
 def get_font_name(filelike):
