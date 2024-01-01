@@ -1,7 +1,7 @@
 from weblate.checks.base import TargetCheck
 from django.utils.html import format_html
 from rpgmv import RpgLexer
-from rpgmv import HtmlFormatter
+from rpgmv.formatters import HtmlFormatter, yttdColors
 
 def frequency_table(tokens, table):
 	for t in tokens:
@@ -30,12 +30,12 @@ class RpgTagsCheck(TargetCheck):
 		return sourceFreq != targetFreq
 
 	def get_description(self, check_obj):
-		formatter = HtmlFormatter.HtmlFormatter()
+		formatter = HtmlFormatter()
 		formatter.actorNameSupplier = lambda v : f'"Actor {v}"'
 		formatter.variableSupplier = lambda v : f'"Variable {v}"'
 		formatter.partyMemberSupplier = lambda v : f'"Party member {v}"'
 		formatter.iconSupplier = lambda v : '/favicon.ico'
-		formatter.colors = HtmlFormatter.yttdColors
+		formatter.colors = yttdColors
 
 		formatter.reset()
 

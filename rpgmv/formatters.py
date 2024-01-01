@@ -118,3 +118,38 @@ class HtmlFormatter:
 		if self.isSpanOpen:
 			self.output += "</span>"
 		return self.output
+
+class TextFormatter:
+	variables = {}
+	actorNames = {}
+	partyMemberNames = {}
+	icons = {}
+	currency = "Yen"
+
+	variableSupplier = lambda self, v : self.variables[v]
+	actorNameSupplier = lambda self, v : self.actorNames[v]
+	partyMemberSupplier = lambda self, v : self.partyMemberNames[v]
+	iconSupplier = lambda self, v : self.icons[v]
+
+	output = ""
+
+	def reset():
+		self.output = ""
+
+	def doTheThing(self, tokens) -> str:
+		for t in tokens:
+			if isinstance(t, RpgLexer.RPGText):
+				self.output += t.toFormattedText()
+			elif isinstance(t, RpgLexer.RPGToken):
+				if t.tag == "V":
+					self.output += self.variableSupplier(int(t.argument))
+				elif t.tag == "N":
+					self.output += self.actorNameSupplier(int(t.argument))
+				elif t.tag == "O":
+					self.output += self.partyMemberSupplier(int(t.argument))
+				elif t.tag == "I":
+					self.output += self.iconSupplier(int(t.argument))
+				elif t.tag == "G":
+					self.output += self.currency
+
+		return self.output
