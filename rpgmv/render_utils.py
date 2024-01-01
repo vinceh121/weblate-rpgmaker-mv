@@ -26,6 +26,9 @@ gi.require_version("PangoCairo", "1.0")
 gi.require_version("Pango", "1.0")
 from gi.repository import Pango, PangoCairo  # noqa: E402
 
+from rpgmv.RpgLexer import lex
+from rpgmv.formatters import TextFormatter
+
 FONTCONFIG_CONFIG = """<?xml version="1.0"?>
 <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
 <fontconfig>
@@ -140,13 +143,21 @@ def render_size(font, weight, size, spacing, text, width=1000, lines=1, cache_ke
         fontdesc.set_weight(weight)
     layout.set_font_description(fontdesc)
 
+    textFmt = TextFormatter()
+    textFmt.actorNameSupplier = lambda v : f'"Actor {v}"'
+    textFmt.variableSupplier = lambda v : f'"Variable {v}"'
+    textFmt.partyMemberSupplier = lambda v : f'"Party member {v}"'
+    textFmt.iconSupplier = lambda v : 'ICON'
+
+    formatted_text = textFmt.doTheThing(lex(text))
+
     # This seems to be only way to set letter spacing
     # See https://stackoverflow.com/q/55533312/225718
     layout.set_markup(
         format_html(
             '<span letter_spacing="{}">{}</span>',
             spacing,
-            text,
+            formatted_text,
         )
     )
 
