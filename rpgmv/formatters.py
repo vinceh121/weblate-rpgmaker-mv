@@ -133,7 +133,7 @@ class TextFormatter:
 
 	output = ""
 
-	def reset():
+	def reset(self):
 		self.output = ""
 
 	def doTheThing(self, tokens) -> str:
