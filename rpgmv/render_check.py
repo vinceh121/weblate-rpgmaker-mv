@@ -18,7 +18,7 @@ from weblate.checks.parser import multi_value_flag
 from rpgmv.render_utils import check_render_size
 
 from rpgmv import RpgLexer
-from rpgmv.formatters import HtmlFormatter, yttdColors
+from rpgmv.formatters import TextFormatter, yttdColors
 
 if TYPE_CHECKING:
     from weblate.auth.models import AuthenticatedHttpRequest
@@ -28,7 +28,7 @@ IMAGE = '<a href="{0}" class="thumbnail img-check"><img class="img-responsive" s
 
 
 def example_text(src):
-    formatter = HtmlFormatter()
+    formatter = TextFormatter()
     formatter.actorNameSupplier = lambda v: f'"Actor {v}"'
     formatter.variableSupplier = lambda v: f'"Variable {v}"'
     formatter.partyMemberSupplier = lambda v: f'"Party member {v}"'
