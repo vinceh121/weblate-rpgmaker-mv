@@ -1,29 +1,27 @@
 # Copyright © Michal Čihař <michal@weblate.org>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-#
-# Modified version of the weblate/checks/render.py 
-# file in order to support RPGMaker MV tags and non-wrapping text
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse
 from django.urls import reverse
-from django.utils.html import format_html_join
-from django.utils.translation import gettext_lazy
+from django.utils.html import format_html, format_html_join
+from django.utils.translation import gettext, gettext_lazy
 
 from weblate.checks.base import TargetCheckParametrized
 from weblate.checks.parser import multi_value_flag
 from rpgmv.render_utils import check_render_size
 
-FONT_PARAMS = (
-    ("font-family", "sans"),
-    ("font-weight", None),
-    ("font-size", 10),
-    ("font-spacing", 0),
-)
+if TYPE_CHECKING:
+    from weblate.auth.models import AuthenticatedHttpRequest
+    from weblate.trans.models import Unit
 
-IMAGE = '<a href="{0}" class="thumbnail"><img class="img-responsive" src="{0}" /></a>'
+IMAGE = '<a href="{0}" class="thumbnail img-check"><img class="img-responsive" src="{0}" /></a>'
 
 
 class MaxSizeCheck(TargetCheckParametrized):
@@ -40,17 +38,16 @@ class MaxSizeCheck(TargetCheckParametrized):
     def param_type(self):
         return multi_value_flag(int, 1, 2)
 
-    def get_params(self, unit):
-        for name, default in FONT_PARAMS:
-            if unit.all_flags.has_value(name):
-                try:
-                    yield unit.all_flags.get_value(name)
-                except KeyError:
-                    yield default
-            else:
-                yield default
+    def get_params(self, unit: Unit) -> tuple[str, None | int, int, int]:
+        all_flags = unit.all_flags
+        return (
+            all_flags.get_value_fallback("font-family", "sans"),
+            all_flags.get_value_fallback("font-weight", None),
+            all_flags.get_value_fallback("font-size", 10),
+            all_flags.get_value_fallback("font-spacing", 0),
+        )
 
-    def load_font(self, project, language, name):
+    def load_font(self, project, language, name: str) -> str:
         try:
             group = project.fontgroup_set.get(name=name)
         except ObjectDoesNotExist:
@@ -61,7 +58,9 @@ class MaxSizeCheck(TargetCheckParametrized):
             return f"{group.font.family} {group.font.style}"
         return f"{override.font.family} {override.font.style}"
 
-    def check_target_params(self, sources, targets, unit, value):
+    def check_target_params(
+        self, sources: list[str], targets: list[str], unit: Unit, value
+    ):
         if len(value) == 2:
             width, lines = value
         else:
@@ -75,14 +74,14 @@ class MaxSizeCheck(TargetCheckParametrized):
         return any(
             (
                 not check_render_size(
-                    font,
-                    weight,
-                    size,
-                    spacing,
-                    replace(target),
-                    width,
-                    lines,
-                    self.get_cache_key(unit, i),
+                    text=replace(target),
+                    font=font,
+                    weight=weight,
+                    size=size,
+                    spacing=spacing,
+                    width=width,
+                    lines=lines,
+                    cache_key=self.get_cache_key(unit, i),
                 )
                 for i, target in enumerate(targets)
             )
@@ -93,7 +92,7 @@ class MaxSizeCheck(TargetCheckParametrized):
             "render-check",
             kwargs={"check_id": self.check_id, "unit_id": check_obj.unit_id},
         )
-        return format_html_join(
+        images = format_html_join(
             "\n",
             IMAGE,
             (
@@ -101,8 +100,17 @@ class MaxSizeCheck(TargetCheckParametrized):
                 for i in range(len(check_obj.unit.get_target_plurals()))
             ),
         )
+        if not check_obj.id:
+            return format_html(
+                "{}{}",
+                gettext(
+                    "It fits into given boundaries. The rendering is shown for your convenience."
+                ),
+                images,
+            )
+        return images
 
-    def render(self, request, unit):
+    def render(self, request: AuthenticatedHttpRequest, unit: Unit):
         try:
             pos = int(request.GET.get("pos", "0"))
         except ValueError:
