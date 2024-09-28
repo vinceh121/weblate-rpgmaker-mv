@@ -17,12 +17,27 @@ from weblate.checks.base import TargetCheckParametrized
 from weblate.checks.parser import multi_value_flag
 from rpgmv.render_utils import check_render_size
 
+from rpgmv import RpgLexer
+from rpgmv.formatters import HtmlFormatter, yttdColors
+
 if TYPE_CHECKING:
     from weblate.auth.models import AuthenticatedHttpRequest
     from weblate.trans.models import Unit
 
 IMAGE = '<a href="{0}" class="thumbnail img-check"><img class="img-responsive" src="{0}" /></a>'
 
+
+def example_text(src):
+    formatter = HtmlFormatter()
+    formatter.actorNameSupplier = lambda v: f'"Actor {v}"'
+    formatter.variableSupplier = lambda v: f'"Variable {v}"'
+    formatter.partyMemberSupplier = lambda v: f'"Party member {v}"'
+    formatter.iconSupplier = lambda v: '/favicon.ico'
+    formatter.colors = yttdColors
+
+    formatter.reset()
+
+    return formatter.doTheThing(RpgLexer.lex(src))
 
 class MaxSizeCheck(TargetCheckParametrized):
     """Check for maximum size of rendered text."""
@@ -74,7 +89,7 @@ class MaxSizeCheck(TargetCheckParametrized):
         return any(
             (
                 not check_render_size(
-                    text=replace(target),
+                    text=example_text(replace(target)),
                     font=font,
                     weight=weight,
                     size=size,
