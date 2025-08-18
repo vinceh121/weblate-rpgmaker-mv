@@ -1,5 +1,5 @@
 from weblate.checks.base import TargetCheck
-from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from rpgmv import RpgLexer
 from rpgmv.formatters import HtmlFormatter, yttdColors
 
@@ -55,7 +55,7 @@ class RpgTagsCheck(TargetCheck):
 		except ValueError as e:
 			targetError = e
 
-		return format_html(f"""<table class=\"table table-bordered table-striped\">
+		return mark_safe(f"""<table class=\"table table-bordered table-striped\">
 			<tbody>
 			<tr {"class='danger'" if sourceError else ""}>
 				<td>Source</td>
@@ -66,4 +66,3 @@ class RpgTagsCheck(TargetCheck):
 				<td>{targetHtml or targetError}</td>
 			</tr>
 		</table>""")
-
