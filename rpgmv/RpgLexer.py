@@ -38,7 +38,7 @@ def lex(rawText) -> list[RPGToken]:
 
 	while i < len(rawText):
 		c = rawText[i]
-		if c == "\\":
+		if c == "\\" and i + 1 < len(rawText):
 			if len(text) != 0:
 				tokens.append(RPGText(text))
 				text = ''
