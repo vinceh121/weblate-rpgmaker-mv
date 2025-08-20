@@ -1,6 +1,6 @@
 import unittest
-import RpgLexer
-from formatters import HtmlFormatter, TextFormatter, yttdColors
+from rpgmv import RpgLexer
+from rpgmv.formatters import HtmlFormatter, TextFormatter, yttdColors
 
 class LexerTest(unittest.TestCase):
 	def test_formats(self):
@@ -22,6 +22,11 @@ class LexerTest(unittest.TestCase):
 
 		self.assertEqual(list(map(lambda t : t.toUnformattedText(), tokens)), unformatted)
 		self.assertEqual(list(map(lambda t : t.toFormattedText(), tokens)), formatted)
+
+	def test_issue_4(self):
+		string = "\\.\\"
+		tokens = RpgLexer.lex(string)
+
 
 class FormatterTest(unittest.TestCase):
 	def test_html_formatter(self):
